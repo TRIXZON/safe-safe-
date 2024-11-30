@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+
+
+<html lang="en">
+
+
+
+<head>
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>Coin Earnings</title>
+
+
+
+    <style>
+
+
+
+        body {
+
+
+
+            background: linear-gradient(135deg, #0f0c29, #00adb5);
+
+
+
+            color: white;
+
+
+
+            font-family: 'Open Sans', sans-serif;
+
+
+
+            height: 100vh;
+
+
+
+            margin: 0;
+
+
+
+            display: flex;
+
+
+
+            justify-content: center;
+
+
+
+            align-items: center;
+
+
+
+            flex-direction: column;
+
+
+
+        }
+
+
+
+        .coin-info {
+
+
+
+            background-color: rgba(0, 0, 0, 0.7);
+
+
+
+            padding: 20px;
+
+
+
+            border-radius: 10px;
+
+
+
+            text-align: center;
+
+
+
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+
+
+
+            width: 80%;
+
+
+
+            max-width: 500px;
+
+
+
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+
+
+        }
+
+
+
+        .coin-info:hover {
+
+
+
+            transform: scale(1.05);
+
+
+
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+
+
+
+        }
+
+
+
+        .coin-info h1 {
+
+
+
+            margin: 0;
+
+
+
+            font-size: 36px;
+
+
+
+        }
+
+
+
+        .coin-info p {
+
+
+
+            margin: 10px 0;
+
+
+
+            font-size: 18px;
+
+
+
+        }
+
+
+
+        .progress-container {
+
+
+
+            width: 100%;
+
+
+
+            background-color: #ddd;
+
+
+
+            border-radius: 5px;
+
+
+
+            overflow: hidden;
+
+
+
+            margin: 20px 0;
+
+
+
+        }
+
+
+
+        .progress-bar {
+
+
+
+            height: 30px;
+
+
+
+            background-color: #ffcc00;
+
+
+
+            width: 0;
+
+
+
+            text-align: center;
+
+
+
+            line-height: 30px;
+
+
+
+            color: black;
+
+
+
+            font-weight: bold;
+
+
+
+            transition: width 0.5s ease;
+
+
+
+        }
+
+
+
+        .back-button {
+
+
+
+            margin-top: 20px;
+
+
+
+            padding: 10px 20px;
+
+
+
+            background-color: #ffcc00;
+
+
+
+            color: black;
+
+
+
+            border: none;
+
+
+
+            border-radius: 5px;
+
+
+
+            cursor: pointer;
+
+
+
+            font-size: 16px;
+
+
+
+            font-weight: bold;
+
+
+
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+
+
+
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+
+
+        }
+
+
+
+        .back-button:hover {
+
+
+
+            transform: scale(1.05);
+
+
+
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+
+
+
+        }
+
+
+
+    </style>
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+
+</head>
+
+
+
+<body>
+
+
+
+    <div class="coin-info">
+
+
+
+        <h1>Coin Earnings</h1>
+
+
+
+        <p id="total-coins">Total Coins: 0</p>
+
+
+
+        <div class="progress-container">
+
+
+
+            <div class="progress-bar" id="progress-bar">0%</div>
+
+
+
+        </div>
+
+
+
+        <p>0 Coins <span style="float: right;">100,000 Coins</span></p>
+
+
+
+        <button class="back-button" onclick="goBack()">
+
+
+
+            <i class="fas fa-arrow-left icon"></i> Back to Dashboard
+
+
+
+        </button>
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <script>
+
+
+
+        const totalCoins = localStorage.getItem('totalCoins') || 0;
+
+
+
+        document.getElementById('total-coins').innerText = `Total Coins: ${totalCoins}`;
+
+
+
+
+
+
+
+        const progressBar = document.getElementById('progress-bar');
+
+
+
+        const progressPercentage = Math.min((totalCoins / 100000) * 100, 100);
+
+
+
+        progressBar.style.width = progressPercentage + '%';
+
+
+
+        progressBar.innerText = progressPercentage.toFixed(2) + '%';
+
+
+
+
+
+
+
+        if (totalCoins >= 100000) {
+
+
+
+            alert("Congratulations! You've earned 100,000 coins and are now monetized!");
+
+
+
+        }
+
+
+
+
+
+
+
+        function goBack() {
+
+
+
+            window.location.href = "ui.html";
+
+
+
+        }
+
+
+
+    </script>
+
+
+
+</body>
+
+
+
+</html>
+
+
+
+
+
+
+
+
+
+

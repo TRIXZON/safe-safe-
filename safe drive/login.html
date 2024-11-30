@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Signup</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #1a237e, #64b5f6);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .container h1 {
+            margin-bottom: 20px;
+        }
+        .container input {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+            border: none;
+            border-radius: 5px;
+        }
+        .container button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0d47a1;
+            color: white;
+            cursor: pointer;
+        }
+        .container button:hover {
+            background-color: #1565c0;
+        }
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 14px;
+        }
+        .terms {
+            margin-top: 20px;
+            font-size: 16px;
+            color: black;
+        }
+        .terms label {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+        }
+        .terms input {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+        }
+        .terms a {
+            color: black;
+            text-decoration: none;
+        }
+        .terms a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google Login</h1>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="login()">Login</button>
+        <h1>or</h1>
+        <button onclick="signup()">Sign Up</button>
+        
+        <div class="terms">
+            <label>
+                <input type="checkbox" id="termsCheckbox" required>
+                I allow all the <a href="terms.html" target="_blank">terms and conditions</a>
+            </label>
+        </div>
+    </div>
+    <div class="footer">
+        Rudransh Awasthi
+    </div>
+    <script>
+        let users = {};
+
+        // Fetch users from JSON file
+        fetch('users.json')
+            .then(response => response.json())
+            .then(data => {
+                users = data.users;
+            })
+            .catch(error => console.error('Error fetching user data:', error));
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (email && password) {
+                if (users[email] && users[email] === password) {
+                    window.location.href = 'index.html'; // Redirect to splash.html after successful login
+                } else {
+                    alert('Invalid email or password.');
+                }
+            } else {
+                alert('Please enter both email and password.');
+            }
+        }
+
+        function signup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (email && password) {
+                if (users[email]) {
+                    alert('Email already registered. Please log in.');
+                } else {
+                    users[email] = password;
+                    alert(`Account created for ${email}. You can now log in.`);
+                    // Note: This won't persist changes to the JSON file
+                }
+            } else {
+                alert('Please enter both email and password.');
+            }
+        }
+    </script>
+</body>
+</html>

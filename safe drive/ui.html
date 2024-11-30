@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Drive App</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0c29, #00adb5);
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            flex-direction: column;
+        }
+        .monitoring-bar {
+            background-color: rgba(255, 204, 0, 0.8);
+            color: black;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        .emergency-button {
+            background-color: #ffcc00;
+            color: black;
+            padding: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.5);
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .rectangle-button {
+            background-color: #b22222;
+            width: 120px;
+            height: 50px;
+            border: none;
+            border-radius: 5px;
+            position: absolute;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+        }
+        .top-left { top: calc(50% - 120px); left: calc(50% - 140px); }
+        .top-right { top: calc(50% - 120px); left: calc(50% + 20px); }
+        .bottom-right { top: calc(50% + 60px); left: calc(50% + 20px); }
+        .coin-button {
+            background-color: #ff5722;
+            color: white;
+            width: 120px;
+            height: 40px;
+            border: none;
+            border-radius: 5px;
+            position: absolute;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            left: 20px;
+            bottom: 20px;
+        }
+        .start-drive-button {
+            background-color: #ffcc00;
+            color: black;
+            padding: 20px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            box-shadow: 0 4px 10px rgba(255, 204, 0, 0.5);
+        }
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #1f4068, #1b1b2f);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .footer:hover {
+            box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00, 0 0 35px #ffcc00;
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="monitoring-bar" onclick="openCoinPage()">Monetizing Status</div>
+    <button class="emergency-button" onclick="emergencyClick()">Emergency</button>
+    <button id="ai-button" class="rectangle-button top-left" onclick="toggleAI()">Enable AI</button>
+    <button class="rectangle-button top-right" onclick="shareCoin()">Share Coin</button>
+    <button class="rectangle-button bottom-right" onclick="viewDriveHistory()">Drive History</button>
+    <button class="coin-button" onclick="openCoinPage()">Coin</button>
+    <button class="start-drive-button" onclick="toggleDrive()">Start Drive</button>
+
+    <!-- Footer with link to publisher page -->
+    <div class="footer" onclick="openPublisherPage()">
+        Rudransh Awasthi (Trixzon Publisher)
+    </div>
+
+    <script>
+        let driveStarted = false;
+        let aiEnabled = false;
+        let emergencyContact = null;
+        let totalDistance = 0; // Total distance in kilometers
+        const coinsPerKm = 10; // Base rate of coins per kilometer
+        let watchId = null; // ID for the geolocation watch
+        let lastPosition = null; // Last known position
+        let recognition; // Voice recognition object
+
+        function openCoinPage() {
+            window.location.href = "coin.html"; // Replace with actual coin page URL
+        }
+
+        function openPublisherPage() {
+            window.location.href = "publisher.html"; // Replace with actual publisher page URL
+        }
+
+        function emergencyClick() {
+            if (!emergencyContact) {
+                emergencyContact = prompt("Please enter your emergency contact number:");
+                if (!emergencyContact) {
+                    alert("Emergency contact is required to use this feature.");
+                    return;
+                }
+            }
+            sendLocation();
+        }
+
+        function sendLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    alert("Sending location to emergency contact.\n" +
+                        "Lat: " + position.coords.latitude + ", Long: " + position.coords.longitude);
+                }, function() {
+                    alert("Location permission denied.");
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function toggleDrive() {
+            const driveButton = document.querySelector('.start-drive-button');
+            const aiButton = document.getElementById('ai-button');
+            if (!driveStarted) {
+                driveStarted = true;
+                driveButton.innerText = "End Drive";
+                aiButton.innerText = "Disable AI";
+                aiButton.onclick = disableAI;
+                startTracking();
+                enableAI();
+                startVoiceRecognition();
+            } else {
+                driveStarted = false;
+                driveButton.innerText = "Start Drive";
+                aiButton.innerText = "Enable AI";
+                aiButton.onclick = enableAI;
+                stopTracking();
+                disableAI();
+                stopVoiceRecognition();
+                calculateCoins();
+            }
+        }
+
+        function enableAI() {
+            if (!aiEnabled) {
+                aiEnabled = true;
+                const greeting = "Hello! I am your voice assistant, here to help you stay safe on the road.";
+                alert(greeting);
+                speak(greeting); // Call the speak function to say the greeting
+            }
+        }
+
+        function disableAI() {
+            if (aiEnabled) {
+                aiEnabled = false;
+                alert("AI disabled.");
+            }
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(speech);
+            } else {
+                alert("Speech synthesis not supported in this browser.");
+            }
+        }
+
+        function shareCoin() {
+            alert("Shared Coin with other drivers!");
+        }
+
+        function viewDriveHistory() {
+            window.location.href = "his.html"; // Replace with actual history page URL
+        }
+
+        function startTracking() {
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(updatePosition, handleError, {
+                    enableHighAccuracy: true,
+                    maximumAge: 10000,
+                    timeout: 5000
+                });
+                alert("Drive tracking started.");
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function stopTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            alert("Drive tracking stopped.");
+        }
+
+        function updatePosition(position) {
+            if (lastPosition) {
+                const distance = calculateDistance(lastPosition, position);
+                totalDistance += distance;
+            }
+            lastPosition = position;
+        }
+
+        function calculateDistance(pos1, pos2) {
+            const R = 6371; // Radius of the Earth in km
+            const dLat = (pos2.coords.latitude - pos1.coords.latitude) * Math.PI / 180;
+            const dLon = (pos2.coords.longitude - pos1.coords.longitude) * Math.PI / 180;
+            const a = 
+                0.5 - Math.cos(dLat)/2 + 
+                Math.cos(pos1.coords.latitude * Math.PI / 180) * Math.cos(pos2.coords.latitude * Math.PI / 180) * 
+                (1 - Math.cos(dLon))/2;
+            return R * 2 * Math.asin(Math.sqrt(a));
+        }
+
+        function calculateCoins() {
+            const totalCoins = totalDistance * coinsPerKm;
+            localStorage.setItem('totalCoins', totalCoins);
+            alert(`You have earned ${totalCoins} coins for driving ${totalDistance.toFixed(2)} km.`);
+        }
+
+        // Voice recognition functionality
+        function startVoiceRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Speech Recognition not supported in this browser.");
+                return;
+            }
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = function() {
+                console.log("Voice recognition started. Speak now...");
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[event.resultIndex][0].transcript.toLowerCase();
+                console.log("Voice command: " + transcript);
+                processVoiceCommand(transcript);
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Error occurred in recognition: " + event.error);
+            };
+
+            recognition.onend = function() {
+                console.log("Voice recognition ended.");
+            };
+
+            recognition.start();
+        }
+
+        function stopVoiceRecognition() {
+            if (recognition) {
+                recognition.stop();
+            }
+        }
+
+        function processVoiceCommand(command) {
+            switch (command) {
+                case 'start drive':
+                    if (!driveStarted) toggleDrive();
+                    break;
+                case 'end drive':
+                    if (driveStarted) toggleDrive();
+                    break;
+                case 'enable ai':
+                    if (!aiEnabled) enableAI();
+                    break;
+                case 'disable ai':
+                    if (aiEnabled) disableAI();
+                    break;
+                case 'emergency':
+                    emergencyClick();
+                    break;
+                case 'coin':
+                    openCoinPage();
+                    break;
+                case 'view drive history':
+                    viewDriveHistory();
+                    break;
+                default:
+                    alert("Command not recognized.");
+            }
+        }
+
+        // Function to toggle button colors
+        function toggleButtonColor(button) {
+            if (button.style.backgroundColor === 'rgb(178, 34, 34)') { // Red
+                button.style.backgroundColor = '#ffcc00'; // Yellow
+            } else if (button.style.backgroundColor === 'rgb(255, 204, 0)') { // Yellow
+                button.style.backgroundColor = '#b22222'; // Red
+            }
+        }
+
+        // Add event listeners to buttons
+        document.querySelectorAll('.rectangle-button, .start-drive-button, .emergency-button').forEach(button => {
+            button.addEventListener('click', function() {
+                toggleButtonColor(button);
+            });
+        });
+    </script>
+</body>
+</html>

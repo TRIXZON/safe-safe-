@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive History</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0c29, #00adb5);
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #map {
+            height: 60%;
+            width: 90%;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+        .drive-info {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        .back-button {
+            padding: 10px 20px;
+            background-color: #ffcc00;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .back-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="map" width="800" height="400"></canvas>
+    <div class="drive-info" id="drive-info">
+        <h2>Last Drive Summary</h2>
+        <p id="drive-summary">Loading...</p>
+    </div>
+    <button class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left icon"></i> Back to Dashboard
+    </button>
+    <script>
+        function displayDriveSummary() {
+            const totalDistance = localStorage.getItem('totalDistance') || 0;
+            const totalCoins = localStorage.getItem('totalCoins') || 0;
+            const driveSummary = document.getElementById('drive-summary');
+            driveSummary.innerText = `Distance: ${parseFloat(totalDistance).toFixed(2)} km | Coins: ${totalCoins}`;
+        }
+
+        function goBack() {
+            window.location.href = "ui.html";
+        }
+
+        function drawPath() {
+            const canvas = document.getElementById('map');
+            const ctx = canvas.getContext('2d');
+            const locationHistory = JSON.parse(localStorage.getItem('locationHistory')) || [];
+
+            if (locationHistory.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(locationHistory[0].x, locationHistory[0].y);
+
+                for (let i = 1; i < locationHistory.length; i++) {
+                    ctx.lineTo(locationHistory[i].x, locationHistory[i].y);
+                }
+
+                ctx.strokeStyle = '#FF0000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            } else {
+                ctx.font = '20px Arial';
+                ctx.fillStyle = 'black';
+                ctx.fillText('No path data available', canvas.width / 2 - 100, canvas.height / 2);
+            }
+        }
+
+        window.onload = function() {
+            displayDriveSummary();
+            drawPath();
+        }
+    </script>
+</body>
+</html>
+
